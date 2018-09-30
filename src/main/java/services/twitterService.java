@@ -33,6 +33,7 @@ public class twitterService {
         ConfigurationBuilder cb = new ConfigurationBuilder();
         
         cb.setDebugEnabled(false)
+          .setJSONStoreEnabled(true)
           .setOAuthConsumerKey(ACCESS_KEY)
           .setOAuthConsumerSecret(ACCESS_SECRET)
           .setOAuthAccessToken(ACCESS_TOKEN)
