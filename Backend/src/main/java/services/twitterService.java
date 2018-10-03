@@ -46,7 +46,6 @@ public class twitterService {
        
         Query query = new Query(search);
         query.geoCode(location, 25, Query.Unit.km);
-        //query.setCount(100);
         query.since(simpleDateFormat.format(since));
         query.until(simpleDateFormat.format(until));
         
