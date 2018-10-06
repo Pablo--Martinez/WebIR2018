@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package services;
 
 import java.text.SimpleDateFormat;
@@ -18,26 +13,24 @@ import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
 
-/**
- *
- * @author USER
- */
 public class twitterService {
     private static final String ACCESS_KEY = "DwaX0aV673NM0n2cnY40ndtvm";
     private static final String ACCESS_SECRET = "3coONK7a5h935HWnAAojMol9DvnbL9weX1jza3JQSwvizNfxR2";
     private static final String ACCESS_TOKEN = "2749205248-8LKVgzpuca3AV29j3UgfN5ypaHOMi5lt52aUHeT";
     private static final String ACCESS_TOKEN_SECRET = "xZj1Tt7PEdMzAcRLufuBdJRetmdibeMNCfrwRJnPy8dpJ";
     private static final String DATE_FORMAT = "yyyy-MM-dd";
-    
+    public static final int MAX_TWEETS_PER_REQUEST = 100;
+    public static final int RADIUS = 25;
+
     public static List<Status> getTweetsByDate(String search, Date since, Date until, GeoLocation location, int numberOfTweets) throws TwitterException {
-        ConfigurationBuilder cb = new ConfigurationBuilder();
-        
-        cb.setDebugEnabled(false)
-          .setJSONStoreEnabled(true)
-          .setOAuthConsumerKey(ACCESS_KEY)
-          .setOAuthConsumerSecret(ACCESS_SECRET)
-          .setOAuthAccessToken(ACCESS_TOKEN)
-          .setOAuthAccessTokenSecret(ACCESS_TOKEN_SECRET);
+        ConfigurationBuilder cb = new ConfigurationBuilder()
+                .setDebugEnabled(false)
+                .setJSONStoreEnabled(true)
+                .setOAuthConsumerKey(ACCESS_KEY)
+                .setOAuthConsumerSecret(ACCESS_SECRET)
+                .setOAuthAccessToken(ACCESS_TOKEN)
+                .setOAuthAccessTokenSecret(ACCESS_TOKEN_SECRET);
+
         TwitterFactory tf = new TwitterFactory(cb.build());
         Twitter twitter = tf.getInstance();
         
@@ -45,27 +38,37 @@ public class twitterService {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT);
        
         Query query = new Query(search);
-        query.geoCode(location, 25, Query.Unit.km);
-        //query.setCount(100);
+        query.geoCode(location, RADIUS, Query.Unit.km);
         query.since(simpleDateFormat.format(since));
         query.until(simpleDateFormat.format(until));
         
         long lastID = Long.MAX_VALUE;
         List<Status> tweets = new ArrayList<>();
-        
-        while (tweets.size () < numberOfTweets) {
-            if (numberOfTweets - tweets.size() > 100)
-              query.setCount(100);
+        boolean exitstsTweets = true;
+        int numberOfRequestToFinish = numberOfTweets / MAX_TWEETS_PER_REQUEST;
+        int currentAPICallRequests = 0;
+
+        while (tweets.size () < numberOfTweets && exitstsTweets && currentAPICallRequests <= numberOfRequestToFinish) {
+            if (numberOfTweets - tweets.size() > MAX_TWEETS_PER_REQUEST)
+              query.setCount(MAX_TWEETS_PER_REQUEST);
             else 
               query.setCount(numberOfTweets - tweets.size());
 
             QueryResult result = twitter.search(query);
             tweets.addAll(result.getTweets());
 
-            for (Status t: tweets) 
-              if(t.getId() < lastID) lastID = t.getId();
+            if (tweets.size() > 0) {
+                for (Status t : tweets)
+                    if (t.getId() < lastID) lastID = t.getId();
 
-            query.setMaxId(lastID-1);
+                query.setMaxId(lastID - 1);
+            } else {
+                //No se encontraron regitsros
+                exitstsTweets = false;
+            }
+
+            currentAPICallRequests++;
+
           }
         
         return tweets;
