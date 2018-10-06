@@ -10,18 +10,22 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import services.elasticSearchService;
 import services.twitterService;
+import sun.util.locale.provider.LocaleServiceProviderPool;
 import twitter4j.GeoLocation;
 import twitter4j.Status;
 import twitter4j.TwitterException;
+import twitter4j.TwitterObjectFactory;
 import twitter4j.json.DataObjectFactory;
 
 /**
@@ -30,75 +34,114 @@ import twitter4j.json.DataObjectFactory;
  */
 public class Main {
     public static void main(String[] args) {
+        //Cargo los tweets de ayer
+        //getYesterdayTweets();
 
         //Cargo los tweets en ES
-        loadTweetsInES();
+        loadTweetsInES("twitter","twitterJson.txt");
 
         //Obtengo para un caso particular
         getCountOfTweets("twitter", "astori");
     }
 
-    public static void loadTweetsInES() {
+    public static void loadTweetsInES(String index, String fileName) {
+
         elasticSearchService es = elasticSearchService.getInstance();
-        Date to = new Date();
 
-        Date from = new Date();
-        from.setDate(to.getDate() - 7);
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map tweetsMap;
 
-        List<Status> tweets;
-        AtomicInteger docId = new AtomicInteger(0);
+        //Trato de levantar la info desde el file
+        File file = new File(fileName);
+
+        if (!file.exists()) {
+            getYesterdayTweets();
+        }
 
         try {
-            //Trato de levantar la info desde el file
-            File file = new File("twitterJson.txt");
+            //Parseo el archivo y obtengo los tweets guardados
+            tweetsMap = objectMapper.readValue(file, new TypeReference<Map<String,Object>>(){});
 
-            if (file.exists()) {
-                try (Stream<String> stream = Files.lines(Paths.get("twitterJson.txt"))) {
-                    stream.forEach(line -> {
-                        if(es.putDocument("twitter","doc", docId.toString(),line)) {
-                            System.out.println(String.format("Se ingreso el indice %s",docId.toString()));
-                        } else {
-                            System.out.println(String.format("Ocurrio un error al ingresar el indice %s",docId.toString()));
-                        }
-                        docId.getAndIncrement();
-                    });
-                } catch (IOException e){}
-
-            } else {
-                //Si no existe el file la obtengo usando la API
-                tweets = twitterService.getTweetsByDate("politica", from, to, new GeoLocation(-34.9032800,-56.1881600), 1000);
-
-                try {
-
-                    file.createNewFile();
-                    FileWriter fw = new FileWriter(file, true);
-
-                    for (Status tweet : tweets) {
-                        String json = DataObjectFactory.getRawJSON(tweet);
-                        fw.write(json + "\n");
-                        if(es.putDocument("twitter","doc", docId.toString(),json)){
-                            System.out.println(String.format("Se ingreso el indice %s",docId.toString()));
-                        } else {
-                            System.out.println(String.format("Ocurrio un error al ingresar el indice %s",docId.toString()));
-                        }
-                        docId.getAndIncrement();
+            tweetsMap.forEach( (id, tweet) -> {
+                //Verifico que no exista el id en ES
+                if(!es.existsDocument(index, "doc", id.toString())) {
+                    if(es.putDocument(index,"doc", id.toString(),tweet.toString())) {
+                        System.out.println(String.format("Se ingreso el indice %s",id));
+                    } else {
+                        System.out.println(String.format("Ocurrio un error al ingresar el indice %s",id));
                     }
-
-                    fw.close();
-
-                } catch (IOException e) {
-
                 }
-            }
 
-        } catch (TwitterException ex) {
-            ex.printStackTrace();
-            System.out.println("Failed to search tweets: " + ex.getMessage());
-            System.exit(-1);
+            });
+        } catch (IOException e){
+            System.out.println(e);
         }
+
     }
 
     public static void getCountOfTweets(String index, String content) {
         System.out.println("Registros encontrado: " + elasticSearchService.getInstance().getQuantityOfDocuments(index,content));
+    }
+
+    public static void getYesterdayTweets() {
+        //Se recuperan los tweets de ayer
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH,-2);
+
+        Date from = calendar.getTime();
+
+        calendar.add(Calendar.DAY_OF_MONTH,1);
+
+        Date to = calendar.getTime();
+
+        Map tweetsMap;
+        ObjectMapper objectMapper = new ObjectMapper();
+        Gson gson = new Gson();
+
+        try {
+            List<Status> tweets = twitterService.getTweetsByDate("politica", from, to, new GeoLocation(-34.9032800,-56.1881600), 1500);
+
+            //Trato de levantar la info desde el file
+            File file = new File("twitterJson.txt");
+
+            if (file.exists()) {
+                //Parseo el archivo y obtengo los tweets guardados
+                tweetsMap = objectMapper.readValue(file, new TypeReference<Map<String,Object>>(){});
+
+                for(Status tweet : tweets) {
+                    Long id =  tweet.getId();
+
+                    if(!tweetsMap.containsKey(id.toString())) {
+                        String json = gson.toJson(tweet);
+                        tweetsMap.put(id.toString(), json);
+                    }
+                }
+
+            } else {
+
+                //Creo el mapa
+                tweetsMap = new HashMap();
+
+                for(Status tweet : tweets) {
+                    Long id =  tweet.getId();
+                    String json = gson.toJson(tweet);
+
+                    if(json != null)
+                        tweetsMap.put(id.toString(), json);
+                }
+            }
+
+            // Guardo en el archivo y salvo
+            if (tweetsMap.size() > 0) {
+                file.createNewFile();
+                objectMapper.writeValue(file, tweetsMap);
+            }
+
+        } catch (TwitterException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
