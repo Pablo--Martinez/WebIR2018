@@ -1,0 +1,25 @@
+div {
+    font-family: 'Oswald', sans-serif;
+}
+
+#divDescripcion {
+    text-align:center;
+    width:50%;
+    margin: auto;
+    padding-top: 20px;
+}
+
+#divTitulo {
+    text-align:center;
+    width:25%;
+    margin: auto;
+}
+
+h1 {
+    padding-bottom: 20px;
+    color: red;
+}
+
+#divIntro {
+    padding-top: 30px;
+}
