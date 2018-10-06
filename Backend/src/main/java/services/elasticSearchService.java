@@ -49,8 +49,8 @@ public class elasticSearchService {
         return INSTANCE;
     }
 
-    public boolean existsDocument(String index, String type, String id) {
-        GetRequest getRequest = new GetRequest(index, type, id);
+    public boolean existsDocument(String index, String id) {
+        GetRequest getRequest = new GetRequest(index, SEARCH_TYPE, id);
         getRequest.fetchSourceContext(new FetchSourceContext(false));
         getRequest.storedFields(NONE_FIELDS);
 
@@ -62,8 +62,8 @@ public class elasticSearchService {
         }
     }
 
-    public boolean putDocument(String index, String type, String id, String content){
-        IndexRequest request = new IndexRequest(index, type, id);
+    public boolean putDocument(String index, String id, String content){
+        IndexRequest request = new IndexRequest(index, SEARCH_TYPE, id);
         request.source(content, XContentType.JSON);
 
         try {

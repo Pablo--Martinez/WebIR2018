@@ -1,24 +1,28 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controllers;
 
-//import org.springframework.web.bind.annotation.RequestMapping;
-//import org.springframework.web.bind.annotation.RequestParam;
-//import org.springframework.web.bind.annotation.RestController;
 
-/**
- *
- * @author USER
- */
+import constants.constants;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import services.elasticSearchService;
 
-//@RestController
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
 public class searchController {
+
+    private elasticSearchService elasticSearchService = services.elasticSearchService.getInstance();
     
-   // @RequestMapping("/test")
-   // public String helloWotld() {
-   //    return "Hello world!";
-   // }
+    @RequestMapping(value = "/get_tweets_count", method = RequestMethod.GET)
+    public Map<String, Long> getTweetCount(@RequestParam(value="search") String search) {
+
+        Map<String, Long> response = new HashMap<>();
+
+        response.put("count",elasticSearchService.getQuantityOfDocuments(constants.INDEX,search));
+
+        return response;
+    }
 }
