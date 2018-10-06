@@ -2,10 +2,7 @@ package controllers;
 
 
 import constants.constants;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import services.elasticSearchService;
 
 import java.util.HashMap;
@@ -15,14 +12,15 @@ import java.util.Map;
 public class searchController {
 
     private elasticSearchService elasticSearchService = services.elasticSearchService.getInstance();
-    
-    @RequestMapping(value = "/get_tweets_count", method = RequestMethod.GET)
-    public Map<String, Long> getTweetCount(@RequestParam(value="search") String search) {
+
+    @GetMapping("/get_tweets_count")
+    public Map<String, Long> getTweetCount(@RequestParam(value="search") String search) throws Exception {
 
         Map<String, Long> response = new HashMap<>();
 
-        response.put("count",elasticSearchService.getQuantityOfDocuments(constants.INDEX,search));
+        response.put("count", elasticSearchService.getQuantityOfDocuments(constants.INDEX, search));
 
         return response;
+
     }
 }
