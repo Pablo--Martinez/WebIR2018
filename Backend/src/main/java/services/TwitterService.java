@@ -13,7 +13,7 @@ import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
 
-public class twitterService {
+public class TwitterService {
     private static final String ACCESS_KEY = "DwaX0aV673NM0n2cnY40ndtvm";
     private static final String ACCESS_SECRET = "3coONK7a5h935HWnAAojMol9DvnbL9weX1jza3JQSwvizNfxR2";
     private static final String ACCESS_TOKEN = "2749205248-8LKVgzpuca3AV29j3UgfN5ypaHOMi5lt52aUHeT";

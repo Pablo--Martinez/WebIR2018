@@ -1,24 +1,24 @@
 package controllers;
 
 
-import constants.constants;
+import constants.Constants;
 import org.springframework.web.bind.annotation.*;
-import services.elasticSearchService;
+import services.ElasticSearchService;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-public class searchController {
+public class SearchController {
 
-    private elasticSearchService elasticSearchService = services.elasticSearchService.getInstance();
+    private ElasticSearchService elasticSearchService = ElasticSearchService.getInstance();
 
     @GetMapping("/get_tweets_count")
     public Map<String, Long> getTweetCount(@RequestParam(value="search") String search) throws Exception {
 
         Map<String, Long> response = new HashMap<>();
 
-        response.put("count", elasticSearchService.getQuantityOfDocuments(constants.INDEX, search));
+        response.put("count", elasticSearchService.getQuantityOfDocuments(Constants.INDEX, search));
 
         return response;
 

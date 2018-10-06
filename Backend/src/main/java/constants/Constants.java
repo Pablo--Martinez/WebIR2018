@@ -1,5 +1,5 @@
 package constants;
 
-public class constants {
+public class Constants {
     public static String INDEX = "tweets";
 }

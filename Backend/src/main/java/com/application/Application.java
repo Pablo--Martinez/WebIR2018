@@ -1,14 +1,14 @@
-package com.example;
+package com.application;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import constants.constants;
+import constants.Constants;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
-import services.elasticSearchService;
-import services.twitterService;
+import services.ElasticSearchService;
+import services.TwitterService;
 import twitter4j.GeoLocation;
 import twitter4j.Status;
 import twitter4j.TwitterException;
@@ -22,14 +22,14 @@ public class Application {
 
 	public static void main(String[] args) {
 		//Cargo los tweets en ES
-		loadTweetsInES(constants.INDEX,"twitterJson.txt");
+		loadTweetsInES(Constants.INDEX,"twitterJson.txt");
 
 		SpringApplication.run(Application.class, args);
 	}
 
 	public static void loadTweetsInES(String index, String fileName) {
 
-		elasticSearchService es = elasticSearchService.getInstance();
+		ElasticSearchService es = ElasticSearchService.getInstance();
 
 		ObjectMapper objectMapper = new ObjectMapper();
 		Map tweetsMap;
@@ -78,7 +78,7 @@ public class Application {
 		Gson gson = new Gson();
 
 		try {
-			List<Status> tweets = twitterService.getTweetsByDate("politica", from, to, new GeoLocation(-34.9032800,-56.1881600), 1500);
+			List<Status> tweets = TwitterService.getTweetsByDate("politica", from, to, new GeoLocation(-34.9032800,-56.1881600), 1500);
 
 			//Trato de levantar la info desde el file
 			File file = new File("twitterJson.txt");

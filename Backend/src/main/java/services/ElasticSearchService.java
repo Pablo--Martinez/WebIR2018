@@ -7,13 +7,10 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.MultiSearchRequest;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -22,7 +19,7 @@ import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-public class elasticSearchService {
+public class ElasticSearchService {
 
     public static final String FIELD_TO_SEARCH_TEXT = "text";
     public static final String FIELD_TO_SEARCH_FULL_TEXT = "full_text";
@@ -32,18 +29,18 @@ public class elasticSearchService {
     public static final int ELASTIC_SEARCH_PORT = 9200;
     public static final String NONE_FIELDS = "_none_";
     private Logger LOGGER = Logger.getLogger("elasticSearchService");
-    private static elasticSearchService INSTANCE = null;
+    private static ElasticSearchService INSTANCE = null;
     private RestHighLevelClient client;
 
-    private elasticSearchService() {
+    private ElasticSearchService() {
         client = new RestHighLevelClient(
                 RestClient.builder(
                         new HttpHost(ELASTIC_SEARCH_HOST, ELASTIC_SEARCH_PORT, ELASTIC_SEARCH_PROTOCOL)));
     }
 
-    public static elasticSearchService getInstance() {
+    public static ElasticSearchService getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new elasticSearchService();
+            INSTANCE = new ElasticSearchService();
         }
 
         return INSTANCE;
