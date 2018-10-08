@@ -21,10 +21,29 @@ import java.util.*;
 public class Application {
 
 	public static void main(String[] args) {
-		//Cargo los tweets en ES
-		loadTweetsInES(Constants.INDEX,"twitterJson.txt");
+		if (CheckESStatus()) {
+			//Obtengo nuevos tweets en caso de existir
+			getYesterdayTweets();
 
-		SpringApplication.run(Application.class, args);
+			//Cargo los tweets en ES
+			loadTweetsInES(Constants.INDEX, "twitterJson.txt");
+
+			SpringApplication.run(Application.class, args);
+		} else {
+			System.out.println("El Cluster de Elasticsearch no esta activo");
+			System.exit(-1);
+		}
+	}
+
+	public static boolean CheckESStatus() {
+		ElasticSearchService es = ElasticSearchService.getInstance();
+
+		try {
+			return es.checkESStatus();
+		} catch (IOException e) {
+			return false;
+		}
+
 	}
 
 	public static void loadTweetsInES(String index, String fileName) {
@@ -44,6 +63,8 @@ public class Application {
 		try {
 			//Parseo el archivo y obtengo los tweets guardados
 			tweetsMap = objectMapper.readValue(file, new TypeReference<Map<String,Object>>(){});
+
+			System.out.println(String.format("Hay %d tweets para cargar",tweetsMap.size()));
 
 			tweetsMap.forEach( (id, tweet) -> {
 				//Verifico que no exista el id en ES

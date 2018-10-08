@@ -1,6 +1,8 @@
 package services;
 
 import org.apache.http.HttpHost;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
@@ -10,6 +12,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
@@ -44,6 +47,13 @@ public class ElasticSearchService {
         }
 
         return INSTANCE;
+    }
+
+    public boolean checkESStatus() throws IOException {
+        ClusterHealthRequest request = new ClusterHealthRequest();
+        ClusterHealthResponse response = client.cluster().health(request, RequestOptions.DEFAULT);
+
+        return response.getStatus() == ClusterHealthStatus.GREEN;
     }
 
     public boolean existsDocument(String index, String id) {
