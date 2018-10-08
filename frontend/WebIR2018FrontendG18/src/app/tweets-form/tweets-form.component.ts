@@ -15,7 +15,7 @@ export class TweetsFormComponent implements OnInit {
   ocurrencias;
   palabra;
 
-  constructor(private http: Http, private service: WebserviceService){ 
+  constructor(private http: Http, private service: WebserviceService){
   }
 
   ngOnInit() {
@@ -27,6 +27,6 @@ export class TweetsFormComponent implements OnInit {
     this.service.getTweetsCount(this.palabra).then((data:any)=>{
       this.ocurrencias = data;
     });
-  }
+  } 
 
 }
