@@ -14,13 +14,9 @@ public class SearchController {
     private ElasticSearchService elasticSearchService = ElasticSearchService.getInstance();
 
     @GetMapping("/get_tweets_count")
-    public Map<String, Long> getTweetCount(@RequestParam(value="search") String search) throws Exception {
+    public Map<String, Object> getTweetCount(@RequestParam(value="search") String search) throws Exception {
 
-        Map<String, Long> response = new HashMap<>();
-
-        response.put("count", elasticSearchService.getQuantityOfDocuments(Constants.INDEX, search));
-
-        return response;
+        return elasticSearchService.getDocuments(Constants.INDEX,search);
 
     }
 }
