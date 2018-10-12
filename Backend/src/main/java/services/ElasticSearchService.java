@@ -24,6 +24,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 public class ElasticSearchService {
@@ -77,6 +78,25 @@ public class ElasticSearchService {
             LOGGER.warning(String.format("No se pudo verificar la existencia del registro %s: %s",id,e.getMessage()));
             return false;
         }
+    }
+
+    public int loadDocumentsInIndex(String index, Map documentsToLoad) {
+        AtomicInteger docsLoaded = new AtomicInteger(0);
+
+        documentsToLoad.forEach( (id, doc) -> {
+            //Verifico que no exista el id en ES
+            if(!this.existsDocument(index, id.toString())) {
+                if(this.putDocument(index, id.toString(),doc.toString())) {
+                    docsLoaded.getAndIncrement();
+                    System.out.println(String.format("Se ingreso el indice %s",id));
+                } else {
+                    System.out.println(String.format("Ocurrio un error al ingresar el indice %s",id));
+                }
+            }
+
+        });
+
+        return docsLoaded.get();
     }
 
     public boolean putDocument(String index, String id, String content){
@@ -179,6 +199,4 @@ public class ElasticSearchService {
 
         return results;
     }
-
-
 }
