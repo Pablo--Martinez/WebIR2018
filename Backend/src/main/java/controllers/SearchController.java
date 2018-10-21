@@ -8,6 +8,7 @@ import services.ElasticSearchService;
 import java.util.HashMap;
 import java.util.Map;
 
+@CrossOrigin
 @RestController
 public class SearchController {
 
