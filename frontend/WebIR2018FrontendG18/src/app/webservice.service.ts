@@ -10,9 +10,7 @@ export class WebserviceService {
   constructor(private http: Http) { }
 
   getTweetsCount(palabra){
-    let results = {};
-    results.ocurrencias = 0;
-    results.fecha = null;
+    let results = {ocurrencias: 0, fecha: null};
     return new Promise(resolve=>{
       const req = this.http.get(this.endpoint+'get_tweets_count?search='+palabra)
       .subscribe(
