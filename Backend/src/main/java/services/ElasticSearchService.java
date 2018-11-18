@@ -18,6 +18,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
@@ -123,7 +124,9 @@ public class ElasticSearchService {
         SearchRequest firstSearchRequest = new SearchRequest(index);
         firstSearchRequest.types(SEARCH_TYPE);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(QueryBuilders.matchQuery(FIELD_TO_SEARCH_TEXT, search));
+        searchSourceBuilder.from(0);
+        searchSourceBuilder.size(10000);
+        searchSourceBuilder.query(QueryBuilders.matchQuery(FIELD_TO_SEARCH_TEXT, search).fuzziness(Fuzziness.AUTO));
         firstSearchRequest.source(searchSourceBuilder);
 
         request.add(firstSearchRequest);
@@ -132,10 +135,13 @@ public class ElasticSearchService {
         SearchRequest secondSearchRequest = new SearchRequest(index);
         firstSearchRequest.types(SEARCH_TYPE);
         searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(QueryBuilders.matchQuery(FIELD_TO_SEARCH_FULL_TEXT, search));
+        searchSourceBuilder.from(0);
+        searchSourceBuilder.size(10000);
+        searchSourceBuilder.query(QueryBuilders.matchQuery(FIELD_TO_SEARCH_FULL_TEXT, search).fuzziness(Fuzziness.AUTO));
         secondSearchRequest.source(searchSourceBuilder);
 
         request.add(secondSearchRequest);
+
 
 
         MultiSearchResponse searchResponse = null;

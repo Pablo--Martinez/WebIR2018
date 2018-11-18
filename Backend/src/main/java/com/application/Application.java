@@ -25,7 +25,7 @@ public class Application {
 	public static final int NUMBER_OF_TWEETS = 1500;
 	public static final String OR_KEYWORD = " OR ";
 	public static final String EMPTY_STRING = "";
-	public static final int YESTERDAY_START = -2;
+	public static final int YESTERDAY_START = -7;
 	public static final int YESTERDAY_END = 1;
 	public static String TWEETS_DUMP_FILE = "twitterJson.txt";
 	private static String[] KEY_WORDS = {"politica","elecciones","campaña","mujica","astori","tabare","vazquez","pepe",
@@ -136,6 +136,7 @@ public class Application {
 			}
 
 			// Guardo en el archivo y salvo
+			System.out.println("Se guardan " + tweetsMap.size() + " tweets");
 			if (tweetsMap.size() > 0) {
 				file.createNewFile();
 				objectMapper.writeValue(file, tweetsMap);
